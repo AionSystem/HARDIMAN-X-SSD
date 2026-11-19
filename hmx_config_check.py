@@ -546,7 +546,7 @@ def md_tables():
         r = evaluate(packs, actions, name=name)
         stabtxt = ("%s / %s" % (fmt_off(r["off_b_stab"]), fmt_off(r["off_c_stab"]))) if "STAB" in packs else "n/a / n/a"
         out.append("| %s | %.0f to %.0f | %.0f / %.0f | %s / %s | %s | %.3f | %.1f | %.2f | %s |" % (
-            name, r["dry_lo"], r["dry_hi"], r["brief"], round(r["cont"] + 1e-9), fmt_off(r["off_b"]), fmt_off(r["off_c"]),
+            name, r["dry_lo"], r["dry_hi"], r["brief"], r["cont"], fmt_off(r["off_b"]), fmt_off(r["off_c"]),
             stabtxt, r["h"], r["x0_mm"], r["knee_margin"], "pass" if r["admissible"] else "FAIL"))
     out.append("\nFULL is shown only to bound the space. Floor conditions (CAR-9) are site-dependent and not judged here.\n")
 
@@ -556,9 +556,11 @@ def md_tables():
         r = evaluate(packs, actions, name=name)
         out.append("| %s | %.0f | %.2f (%.2f) | %.2f | %s |" % (name, r["knee_lever_cap_mm"], r["ankle_kNm"], r["ankle_kNm_x12"], r["shoulder_kNm"], fmt_off(r["lat_c"])))
     out.append("")
+    
     out.append("### F.7 (generated) Sensitivity sweep, 6,000 samples, seed 7 (Python random; not the original RNG)\n")
     out.append("| Build | Offset limit, cont. class, m (5th / 50th / 95th) | Offset limit, brief, m (5th / 50th / 95th) | CoM offset mm (50th / 95th), share over 20 mm |\n|---|---|---|---|")
-    for name, packs, actions in TRIMS[:2] + TRIMS[2:3] + TRIMS[3:5]:
+    # Adjusted to exactly match the 4 rows in SSD F.7: STD, HANDLING, TOOLING, PROTECTED
+    for name, packs, actions in TRIMS[0:1] + TRIMS[2:5]:
         sw = sweep(packs, actions)
         over = 100.0 * sum(1 for v in sw["x0_mm"] if v > C["car5_limit_mm"]) / len(sw["x0_mm"])
         out.append("| %s | %.2f / %.2f / %.2f | %.2f / %.2f / %.2f | %.1f / %.1f, %.1f%% |" % (
